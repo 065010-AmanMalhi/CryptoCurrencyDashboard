@@ -157,18 +157,38 @@ with st.sidebar.expander("📊 Dataset Overview", expanded=True):
     st.write(f"**Total Records:** {len(df):,}")
     if 'symbol' in df.columns:
         st.write(f"**Unique Cryptocurrencies:** {df['symbol'].nunique()}")
+        # Show all available cryptocurrencies
+        st.write("**Available Coins:**")
+        st.write(", ".join(sorted(df['symbol'].unique())[:20]) + "..." if len(df['symbol'].unique()) > 20 else ", ".join(sorted(df['symbol'].unique())))
     if 'network' in df.columns:
         st.write(f"**Blockchain Networks:** {df['network'].nunique()}")
     st.write(f"**Date Range:** {df['date'].min().strftime('%Y-%m-%d')} to {df['date'].max().strftime('%Y-%m-%d')}")
 
 # Cryptocurrency selection
 available_symbols = sorted(df['symbol'].unique())
+
+# Show popular coins first if they exist
+popular_coins = ['BTCUSDT', 'ETHUSDT', 'ADAUSDT', 'BNBUSDT', 'SOLUSDT', 'XRPUSDT', 'DOTUSDT', 'LTCUSDT']
+default_coins = [coin for coin in popular_coins if coin in available_symbols]
+if not default_coins:
+    default_coins = available_symbols[:5]  # Fallback to first 5
+
 selected_symbols = st.sidebar.multiselect(
     "🪙 Select Cryptocurrencies:",
     options=available_symbols,
-    default=available_symbols[:3],  # Default to first 3
+    default=default_coins,
     help="Choose which cryptocurrencies to analyze"
 )
+
+# Add quick selection buttons
+st.sidebar.markdown("**Quick Select:**")
+col1, col2 = st.sidebar.columns(2)
+with col1:
+    if st.button("All Coins"):
+        selected_symbols = available_symbols
+with col2:
+    if st.button("Top 10"):
+        selected_symbols = available_symbols[:10]
 
 # Network filter (only if network column exists)
 if 'network' in df.columns:
