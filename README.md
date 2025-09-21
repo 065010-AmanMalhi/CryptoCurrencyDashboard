@@ -1,5 +1,4 @@
 # CryptoCurrencyDashboard
-# Crypto Dashboard
 
 Interactive cryptocurrency analysis dashboard built with Streamlit.
 
