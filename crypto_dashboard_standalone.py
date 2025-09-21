@@ -164,31 +164,60 @@ with st.sidebar.expander("📊 Dataset Overview", expanded=True):
         st.write(f"**Blockchain Networks:** {df['network'].nunique()}")
     st.write(f"**Date Range:** {df['date'].min().strftime('%Y-%m-%d')} to {df['date'].max().strftime('%Y-%m-%d')}")
 
-# Cryptocurrency selection
-available_symbols = sorted(df['symbol'].unique())
+# Filter for major cryptocurrencies only
+major_cryptos = [
+    'BTCUSDT',    # Bitcoin
+    'ETHUSDT',    # Ethereum
+    'BNBUSDT',    # Binance Coin
+    'XRPUSDT',    # XRP
+    'ADAUSDT',    # Cardano
+    'SOLUSDT',    # Solana
+    'DOTUSDT',    # Polkadot
+    'LTCUSDT',    # Litecoin
+    'LINKUSDT',   # Chainlink
+    'MATICUSDT',  # Polygon
+    'AVAXUSDT',   # Avalanche
+    'UNIUSDT',    # Uniswap
+    'ATOMUSDT',   # Cosmos
+    'XLMUSDT',    # Stellar
+    'VETUSDT',    # VeChain
+    'ICXUSDT',    # ICON
+    'TRXUSDT',    # TRON
+    'ETCUSDT',    # Ethereum Classic
+    'NEOUSDT',    # NEO
+    'EOSUSDT'     # EOS
+]
 
-# Show popular coins first if they exist
-popular_coins = ['BTCUSDT', 'ETHUSDT', 'ADAUSDT', 'BNBUSDT', 'SOLUSDT', 'XRPUSDT', 'DOTUSDT', 'LTCUSDT']
-default_coins = [coin for coin in popular_coins if coin in available_symbols]
-if not default_coins:
-    default_coins = available_symbols[:5]  # Fallback to first 5
+# Filter dataset to only include major cryptocurrencies
+available_symbols = [symbol for symbol in major_cryptos if symbol in df['symbol'].unique()]
+available_symbols = sorted(available_symbols)
+
+# Filter dataframe to only major cryptos
+df = df[df['symbol'].isin(available_symbols)]
+
+if df.empty:
+    st.error("No major cryptocurrency data found in your dataset.")
+    st.stop()
+
+# Default selection - show top 5 available
+default_coins = available_symbols[:5]
 
 selected_symbols = st.sidebar.multiselect(
-    "🪙 Select Cryptocurrencies:",
+    "Select Major Cryptocurrencies:",
     options=available_symbols,
     default=default_coins,
-    help="Choose which cryptocurrencies to analyze"
+    help="Choose from major cryptocurrencies with reliable chart data"
 )
 
 # Add quick selection buttons
 st.sidebar.markdown("**Quick Select:**")
 col1, col2 = st.sidebar.columns(2)
 with col1:
-    if st.button("All Coins"):
+    if st.button("All Available"):
         selected_symbols = available_symbols
 with col2:
-    if st.button("Top 10"):
-        selected_symbols = available_symbols[:10]
+    if st.button("Top 5"):
+        selected_symbols = available_symbols[:5]
 
 # Network filter (only if network column exists)
 if 'network' in df.columns:
